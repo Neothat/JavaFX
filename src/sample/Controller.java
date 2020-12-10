@@ -11,10 +11,13 @@ import javafx.scene.control.TextField;
 public class Controller {
     @FXML
     private ListView<String> usersList;
+
     @FXML
     private TextArea chatField;
+
     @FXML
     private TextField textField;
+
     @FXML
     private Button sendButton;
 
@@ -22,6 +25,7 @@ public class Controller {
     public void initialize(){
         usersList.setItems(FXCollections.observableArrayList(Main.USERS));
     }
+    
     @FXML
     private void sendMessage(ActionEvent actionEvent) {
         chatField.appendText(textField.getText());
