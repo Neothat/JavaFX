@@ -25,7 +25,7 @@ public class Controller {
     public void initialize(){
         usersList.setItems(FXCollections.observableArrayList(Main.USERS));
     }
-    
+
     @FXML
     private void sendMessage(ActionEvent actionEvent) {
         chatField.appendText(textField.getText());

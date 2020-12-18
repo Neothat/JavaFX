@@ -1,15 +1,9 @@
 package sample;
 
-import com.sun.org.apache.xerces.internal.xs.StringList;
 import javafx.application.Application;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.input.MouseDragEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -31,7 +25,8 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(Main.class.getResource("sample.fxml"));
 
-        AnchorPane root = loader.load();
+        Parent root = loader.load();
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 
