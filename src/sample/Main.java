@@ -12,8 +12,7 @@ import java.util.List;
 
 public class Main extends Application {
 
-    public static final List<String> USERS = new ArrayList<>();
-
+    public static final List<String> USERS = List.of("Oleg", "Erlan", "Denis");
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -32,8 +31,6 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-        USERS.add("Erlan");
-        USERS.add("Oleg");
         launch(args);
     }
 }
