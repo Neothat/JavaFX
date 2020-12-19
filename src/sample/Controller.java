@@ -1,12 +1,13 @@
 package sample;
 
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+
+import java.io.IOException;
 
 public class Controller {
     @FXML
@@ -20,16 +21,33 @@ public class Controller {
 
     @FXML
     private Button sendButton;
+    private Network network;
 
     @FXML
     public void initialize(){
-        usersList.setItems(FXCollections.observableArrayList(Main.USERS));
+        usersList.setItems(FXCollections.observableArrayList(EchoClient.USERS));
     }
 
     @FXML
-    private void sendMessage(ActionEvent actionEvent) {
-        chatField.appendText(textField.getText());
-        chatField.appendText(System.lineSeparator());
+    private void sendMessage() {
+        String message = textField.getText();
+        appendMessage("Я: " + message);
         textField.clear();
+
+        try {
+            network.sendMessage(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+            String errorMessage = "Failed to send message";
+            EchoClient.showNetworkError(e.getMessage(), errorMessage);
+        }
+    }
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
+    public void appendMessage(String message) {
+        chatField.appendText(message);
+        chatField.appendText(System.lineSeparator());
     }
 }
