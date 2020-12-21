@@ -7,6 +7,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.List;
 
 public class EchoClient extends Application {
@@ -33,8 +34,15 @@ public class EchoClient extends Application {
         network.waitMessages(controller);
 
         primaryStage.setOnCloseRequest(event ->
-                network.close()
-        );
+        {
+            try {
+                network.sendMessage("/end");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            network.close();
+        });
     }
 
     public static void showNetworkError(String errorDetails, String errorTitle) {

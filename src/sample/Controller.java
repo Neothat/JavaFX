@@ -39,7 +39,7 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
             String errorMessage = "Failed to send message";
-            EchoClient.showNetworkError(e.getMessage(), errorMessage);
+            //EchoClient.showNetworkError(e.getMessage(), errorMessage);
         }
     }
     public void setNetwork(Network network) {
