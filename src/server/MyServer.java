@@ -1,5 +1,9 @@
 package server;
 
+import server.auth.AuthService;
+import server.auth.BaseAuthService;
+import server.handler.ClientHandler;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,12 +14,18 @@ import java.util.Scanner;
 public class MyServer {
 
     private final List<ClientHandler> clients = new ArrayList<>();
+    private final AuthService authService;
+
+    public MyServer() {
+        this.authService = new BaseAuthService();
+    }
 
     public void start(int port){
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Сервер успешно запущен");
             runServerMessageThread();
+            authService.start();
             
             //noinspection InfiniteLoopStatement
             while (true) {
@@ -24,6 +34,8 @@ public class MyServer {
         } catch (IOException e) {
             System.err.println("Ошибка подключения новыхх клиентов");
             e.printStackTrace();
+        } finally {
+            authService.stop();
         }
     }
 
@@ -45,7 +57,7 @@ public class MyServer {
             while (true){
                 String serverMessage = scanner.next();
                 try {
-                    broadcastMessage(serverMessage, null);
+                    broadcastMessage("Сервер: " + serverMessage, null);
                 } catch (IOException e) {
                     System.err.println("Прерван процесс server message");
                     e.printStackTrace();
@@ -56,7 +68,7 @@ public class MyServer {
         serverMessageThread.start();
     }
 
-    public synchronized void broadcastMessage(String message, ClientHandler sender) throws IOException {
+    public synchronized void  broadcastMessage(String message, ClientHandler sender) throws IOException {
         for (ClientHandler client : clients) {
             if (client == sender) {
                 continue;
@@ -71,5 +83,18 @@ public class MyServer {
 
     public synchronized void unsubscribe(ClientHandler handler) {
         clients.remove(handler);
+    }
+
+    public AuthService getAuthService() {
+        return authService;
+    }
+
+    public synchronized boolean isNickBusy(String nickname) {
+        for (ClientHandler client : clients) {
+            if (client.getNickname().equals(nickname)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
