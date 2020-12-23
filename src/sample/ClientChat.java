@@ -21,6 +21,7 @@ public class ClientChat extends Application {
     private Stage primaryStage;
     private Stage authDialogStage;
     private Network network;
+    private Controller controller;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -98,5 +99,6 @@ public class ClientChat extends Application {
         state = ClientChatState.CHAT;
         authDialogStage.close();
         primaryStage.show();
+        controller.getTextField().requestFocus();
     }
 }

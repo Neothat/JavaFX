@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.AuthDialog">
+<AnchorPane prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.controllers.AuthDialog">
    <children>
       <TextField fx:id="loginField" layoutX="98.0" layoutY="31.0" />
       <Label layoutX="41.0" layoutY="35.0" text="Логин" AnchorPane.leftAnchor="35.0" AnchorPane.topAnchor="35.0" />

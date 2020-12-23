@@ -2,16 +2,16 @@ package sample.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import sample.ClientChat;
 import sample.Network;
+import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
 
 public class Controller {
+    @FXML
+    private TextField textField;
     @FXML
     private ListView<String> usersList;
 
@@ -19,15 +19,36 @@ public class Controller {
     private TextArea chatField;
 
     @FXML
-    private TextField textField;
-
-    @FXML
     private Button sendButton;
+
     private Network network;
+    private String selectedUser;
 
     @FXML
     public void initialize(){
         usersList.setItems(FXCollections.observableArrayList(ClientChat.USERS));
+        textField.requestFocus();
+
+        usersList.setCellFactory(lv -> {
+            MultipleSelectionModel <String> selectionModel = usersList.getSelectionModel();
+            ListCell<String> cell = new ListCell<>();
+            cell.textProperty().bind(cell.itemProperty());
+            cell.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+                usersList.requestFocus();
+                if (! cell.isEmpty()) {
+                    int index = cell.getIndex();
+                    if (selectionModel.getSelectedIndices().contains(index)) {
+                        selectionModel.clearAndSelect(index);
+                        selectedUser = null;
+                    } else {
+                        selectionModel.select(index);
+                        selectedUser = cell.getItem();
+                    }
+                    event.consume();
+                }
+            });
+            return cell;
+        });
     }
 
     @FXML
@@ -37,7 +58,11 @@ public class Controller {
         textField.clear();
 
         try {
-            network.sendMessage(message);
+            if (selectedUser != null) {
+                network.sendPrivateMessage(selectedUser, message);
+            } else {
+                network.sendMessage(message);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             String errorMessage = "Failed to send message";
@@ -51,5 +76,9 @@ public class Controller {
     public void appendMessage(String message) {
         chatField.appendText(message);
         chatField.appendText(System.lineSeparator());
+    }
+
+    public TextField getTextField() {
+        return textField;
     }
 }

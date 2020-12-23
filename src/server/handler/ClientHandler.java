@@ -11,6 +11,8 @@ public class ClientHandler {
     private static final String END_CMD = "/end";
     private static final String AUTH_CMD = "/auth"; // "/auth login password"
     private static final String AUTH_OK_CMD = "/authok";
+    private static final String PRIVATE_MSG_CMD = "/w";
+    private static final String CLIENT_MSG_CMD_PREFIX = "/clientMsg";
 
     private final MyServer myServer;
     private final Socket clientSocket;
@@ -82,6 +84,11 @@ public class ClientHandler {
             System.out.println("message: " + message);
             if (message.startsWith(END_CMD)) {
                 return;
+            }else if (message.startsWith(PRIVATE_MSG_CMD)) {
+                String[] parts = message.split("\\s+", 3);
+                String recipient = parts[1];
+                String privateMessage = parts[2];
+                myServer.sendPrivateMessage(this, recipient, privateMessage);
             } else {
                 myServer.broadcastMessage(nickname + ": " + message, this);
             }
@@ -95,6 +102,10 @@ public class ClientHandler {
 
     public void sendMessage(String message) throws IOException {
         out.writeUTF(message);
+    }
+
+    public void sendMessage(String sender, String message) throws IOException {
+        out.writeUTF(String.format("%s %s %s", CLIENT_MSG_CMD_PREFIX, sender, message));
     }
 
     public String getNickname() {

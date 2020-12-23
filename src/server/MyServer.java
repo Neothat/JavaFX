@@ -97,4 +97,12 @@ public class MyServer {
         }
         return false;
     }
+
+    public void sendPrivateMessage(ClientHandler sender, String recipient, String privateMessage) throws IOException {
+        for (ClientHandler client : clients) {
+            if (client.getNickname().equals(recipient)) {
+                client.sendMessage(sender.getNickname(), privateMessage);
+            }
+        }
+    }
 }
