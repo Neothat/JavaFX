@@ -9,13 +9,11 @@ import server.MyServer;
 
 import java.io.*;
 import java.net.Socket;
-import java.sql.Time;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static NetworkChatClientServer.Command.*;
 import static NetworkChatClientServer.Command.authOkCommand;
-import static NetworkChatClientServer.Command.messageInfoCommand;
 
 public class ClientHandler {
 
@@ -53,6 +51,19 @@ public class ClientHandler {
     }
 
     private void authentication() throws IOException {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(nickname == null) {
+                    try {
+                        closeConnection();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, 120_000);
 
         while (true) {
             Command command = readCommand();
