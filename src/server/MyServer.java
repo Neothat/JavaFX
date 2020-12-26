@@ -1,5 +1,6 @@
 package server;
 
+import NetworkChatClientServer.Command;
 import server.auth.AuthService;
 import server.auth.BaseAuthService;
 import server.handler.ClientHandler;
@@ -73,16 +74,34 @@ public class MyServer {
             if (client == sender) {
                 continue;
             }
-            client.sendMessage(message);
+
+            if (sender == null) {
+                client.sendMessage(message);
+            } else {
+                client.sendMessage(sender.getNickname(), message);
+            }
         }
     }
 
-    public synchronized void subscribe(ClientHandler handler) {
+    public synchronized void subscribe(ClientHandler handler) throws IOException {
         clients.add(handler);
+        notifyClientUsersListUpdate(clients);
     }
 
-    public synchronized void unsubscribe(ClientHandler handler) {
+    public synchronized void unsubscribe(ClientHandler handler) throws IOException {
         clients.remove(handler);
+        notifyClientUsersListUpdate(clients);
+    }
+
+    private void notifyClientUsersListUpdate(List<ClientHandler> clients) throws IOException {
+        List<String> usernames = new ArrayList<>();
+        for (ClientHandler client : clients) {
+            usernames.add(client.getNickname());
+        }
+
+        for (ClientHandler client : clients) {
+            client.sendCommand(Command.updateUsersListCommand(usernames));
+        }
     }
 
     public AuthService getAuthService() {

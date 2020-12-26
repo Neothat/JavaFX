@@ -1,24 +1,29 @@
 package server.handler;
 
+import NetworkChatClientServer.Command;
+import NetworkChatClientServer.CommandType;
+import NetworkChatClientServer.commands.AuthCommandData;
+import NetworkChatClientServer.commands.PrivateMessageCommandData;
+import NetworkChatClientServer.commands.PublicMessageCommandData;
 import server.MyServer;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.sql.Time;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static NetworkChatClientServer.Command.*;
+import static NetworkChatClientServer.Command.authOkCommand;
+import static NetworkChatClientServer.Command.messageInfoCommand;
 
 public class ClientHandler {
-    private static final String END_CMD = "/end";
-    private static final String AUTH_CMD = "/auth"; // "/auth login password"
-    private static final String AUTH_OK_CMD = "/authok";
-    private static final String PRIVATE_MSG_CMD = "/w";
-    private static final String CLIENT_MSG_CMD_PREFIX = "/clientMsg";
 
     private final MyServer myServer;
     private final Socket clientSocket;
 
-    private DataInputStream in;
-    private DataOutputStream out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
 
     private String nickname;
 
@@ -28,8 +33,8 @@ public class ClientHandler {
     }
 
     public void handle() throws IOException {
-        in = new DataInputStream(clientSocket.getInputStream());
-        out = new DataOutputStream(clientSocket.getOutputStream());
+        in = new ObjectInputStream(clientSocket.getInputStream());
+        out = new ObjectOutputStream(clientSocket.getOutputStream());
 
         new Thread(() -> {
         try {
@@ -48,24 +53,29 @@ public class ClientHandler {
     }
 
     private void authentication() throws IOException {
+
         while (true) {
-            String message = in.readUTF();
-            if (message.startsWith(AUTH_CMD)){
-                String[] parts = message.split(" ", 3);
-                String login = parts[1];
-                String password = parts[2];
+            Command command = readCommand();
+            if (command == null){
+                continue;
+            }
+
+            if (command.getType() == CommandType.AUTH) {
+                AuthCommandData data = (AuthCommandData) command.getData();
+                String login = data.getLogin();
+                String password = data.getPassword();
                 String nickname = myServer.getAuthService().getNickByLoginPass(login, password);
                 if (nickname == null) {
-                    out.writeUTF("Некорректные логин или пароль");
+                    sendCommand(errorCommand("Некорректные логин или пароль"));
                     continue;
                 }
 
                 if(myServer.isNickBusy(nickname)) {
-                    out.writeUTF("Такой пользователь уже существует");
+                    sendCommand(Command.errorCommand("Такой пользователь уже существует"));
                     continue;
                 }
 
-                out.writeUTF(String.format("%s %s", AUTH_OK_CMD, nickname));
+                sendCommand(authOkCommand(nickname));
                 setNickname(nickname);
                 myServer.broadcastMessage(String.format("Пользователь '%s' зашел в чат", nickname), null);
                 myServer.subscribe(this);
@@ -74,23 +84,50 @@ public class ClientHandler {
         }
     }
 
+    public void sendCommand(Command command) throws IOException {
+        out.writeObject(command);
+    }
+
+    private Command readCommand() throws IOException{
+        Command command = null;
+        try {
+            command = (Command) in.readObject();
+        }catch (ClassNotFoundException e){
+            System.err.println("Ошибка при прочтении Command class");
+            e.printStackTrace();
+        }
+        return command;
+    }
+
     private void setNickname(String nickname) {
         this.nickname = nickname;
     }
 
     private void readMessage() throws IOException {
         while (true){
-            String message = in.readUTF();
-            System.out.println("message: " + message);
-            if (message.startsWith(END_CMD)) {
-                return;
-            }else if (message.startsWith(PRIVATE_MSG_CMD)) {
-                String[] parts = message.split("\\s+", 3);
-                String recipient = parts[1];
-                String privateMessage = parts[2];
-                myServer.sendPrivateMessage(this, recipient, privateMessage);
-            } else {
-                myServer.broadcastMessage(nickname + ": " + message, this);
+            Command command = readCommand();
+            if(command == null){
+                continue;
+            }
+
+            switch (command.getType()) {
+                case PRIVATE_MESSAGE: {
+                    PrivateMessageCommandData data = (PrivateMessageCommandData) command.getData();
+                    String receiver = data.getReceiver();
+                    String message = data.getMessage();
+                    myServer.sendPrivateMessage(this, receiver, message);
+                    break;
+                }
+                case PUBLIC_MESSAGE: {
+                    PublicMessageCommandData data= (PublicMessageCommandData) command.getData();
+                    String message = data.getMessage();
+                    myServer.broadcastMessage(message, this);
+                    break;
+                }
+                case END:
+                    return;
+                default:
+                    throw new IllegalArgumentException("Unknown command type: " + command.getType());
             }
         }
     }
@@ -101,11 +138,11 @@ public class ClientHandler {
     }
 
     public void sendMessage(String message) throws IOException {
-        out.writeUTF(message);
+        sendCommand(Command.messageInfoCommand(message));
     }
 
     public void sendMessage(String sender, String message) throws IOException {
-        out.writeUTF(String.format("%s %s %s", CLIENT_MSG_CMD_PREFIX, sender, message));
+        sendCommand(Command.clientMessageCommand(sender, message));
     }
 
     public String getNickname() {

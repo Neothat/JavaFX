@@ -29,9 +29,8 @@ public class AuthDialog {
             return;
         }
 
-        String authCommandMessage = String.format("%s %s %s", AUTH_CMD, login, password);
         try {
-            network.sendMessage(authCommandMessage);
+            network.sendAuthMessage(login, password);
         } catch (IOException e) {
             ClientChat.showNetworkError(e.getMessage(), "Auth error");
             e.printStackTrace();

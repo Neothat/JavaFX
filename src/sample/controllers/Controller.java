@@ -13,7 +13,7 @@ public class Controller {
     @FXML
     private TextField textField;
     @FXML
-    private ListView<String> usersList;
+    public ListView<String> usersList;
 
     @FXML
     private TextArea chatField;

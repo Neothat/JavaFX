@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -23,6 +24,10 @@ public class ClientChat extends Application {
     private Network network;
     private Controller controller;
 
+    public void updateUsers(List<String> users) {
+        controller.usersList.setItems(FXCollections.observableList(users));
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         this.primaryStage = primaryStage;
@@ -31,8 +36,11 @@ public class ClientChat extends Application {
         loader.setLocation(ClientChat.class.getResource("fxmlFiles/sample.fxml"));
 
         AnchorPane root = loader.load();
+        controller = loader.getController();
+
         primaryStage.setTitle("Messenger");
         primaryStage.setScene(new Scene(root));
+        controller.getTextField().requestFocus();
 
         network = new Network(this);
         if (!network.connect()) {
