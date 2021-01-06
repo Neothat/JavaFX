@@ -6,6 +6,8 @@ import javafx.scene.control.*;
 import sample.ClientChat;
 import sample.Network;
 import javafx.scene.input.MouseEvent;
+import server.MyServer;
+import server.handler.ClientHandler;
 
 import java.io.IOException;
 

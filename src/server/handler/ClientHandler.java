@@ -17,13 +17,14 @@ import static NetworkChatClientServer.Command.authOkCommand;
 
 public class ClientHandler {
 
+    public static String nickname;
     private final MyServer myServer;
     private final Socket clientSocket;
 
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-    private String nickname;
+    //private String nickname;
 
     public ClientHandler(MyServer myServer, Socket clientSocket) {
         this.myServer = myServer;
@@ -105,7 +106,6 @@ public class ClientHandler {
             command = (Command) in.readObject();
         }catch (ClassNotFoundException e){
             System.err.println("Ошибка при прочтении Command class");
-            e.printStackTrace();
         }
         return command;
     }

@@ -3,7 +3,9 @@ package server;
 import NetworkChatClientServer.Command;
 import server.auth.AuthService;
 import server.auth.BaseAuthService;
+import server.auth.DBAuthService;
 import server.handler.ClientHandler;
+import server.handler.SQLHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -18,7 +20,7 @@ public class MyServer {
     private final AuthService authService;
 
     public MyServer() {
-        this.authService = new BaseAuthService();
+        this.authService = new DBAuthService();
     }
 
     public void start(int port){
@@ -36,6 +38,7 @@ public class MyServer {
             System.err.println("Ошибка подключения новыхх клиентов");
             e.printStackTrace();
         } finally {
+            SQLHandler.disconnect();
             authService.stop();
         }
     }

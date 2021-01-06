@@ -78,7 +78,6 @@ public class Network {
                 }
             } catch (IOException | IllegalAccessException e) {
                 System.err.println("Соединение было разорвано!");
-                e.printStackTrace();
             }
         });
         thread.setDaemon(true);
@@ -153,7 +152,6 @@ public class Network {
             command = (Command) inputStream.readObject();
         } catch (ClassNotFoundException e) {
             System.err.println("Ошибка при прочтении Command class");
-            e.printStackTrace();
         }
         return command;
     }

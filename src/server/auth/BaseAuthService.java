@@ -2,6 +2,7 @@ package server.auth;
 
 import server.User;
 
+import java.sql.*;
 import java.util.Map;
 
 public class BaseAuthService implements AuthService{
@@ -23,8 +24,13 @@ public class BaseAuthService implements AuthService{
     }
 
     @Override
-    public String getNickByLoginPass(String login, String password) {
+    public String getNickByLoginPass(String login, String password){
         User requestedUser = new User(login, password, null);
         return USERS.get(requestedUser);
+    }
+
+    @Override
+    public boolean changeNick(String oldNickname, String newNickname) {
+        return false;
     }
 }
